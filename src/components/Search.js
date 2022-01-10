@@ -1,30 +1,24 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { addLocationToUser, getWeatherByZip } from '../api/data/weatherData';
+import { getWeatherByZip, addLocationToUser } from '../api/data/weatherData';
 
-const initialState = {
-  zip: '',
-};
-
-export default function Search({ user }) {
-  const [formInput, setFormInput] = useState(initialState);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormInput((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
+export default function Search() {
+  const [formInput, setFormInput] = useState('');
+  const [weatherObject, setWeatherObject] = useState({});
 
   const resetForm = () => {
-    setFormInput({ ...initialState });
+    setFormInput('');
   };
 
   const handleClick = () => {
     resetForm();
-    getWeatherByZip(formInput).then(() => {
-      addLocationToUser({ ...formInput, uid: user.uid });
+    getWeatherByZip(formInput).then((weatherObj) => {
+      setWeatherObject({
+        location: weatherObj.name,
+        description: weatherObj.weather,
+        // uid: user.uid,
+      });
+      addLocationToUser(weatherObject);
     });
   };
 
@@ -36,15 +30,17 @@ export default function Search({ user }) {
         </span>
         <input
           type="text"
-          name="weather"
+          name="zip"
+          id="zip"
           className="form-control"
           placeholder="Enter zip code..."
-          aria-label="search for weather"
-          aria-describedby="search for weather"
-          onChange={handleChange}
+          aria-label="search for weather by zip code"
+          aria-describedby="search for weather by zip code"
+          value={formInput}
+          onInput={(e) => setFormInput(e.target.value)}
         />
         <button type="button" onClick={handleClick}>
-          Get Weather
+          Get Weather!
         </button>
       </div>
     </div>
@@ -52,9 +48,14 @@ export default function Search({ user }) {
 }
 
 Search.propTypes = {
-  user: PropTypes.shape(PropTypes.obj),
+  // user: PropTypes.shape(PropTypes.obj),
+  weatherObj: PropTypes.shape({
+    zip: PropTypes.string,
+    firebaseKey: PropTypes.string,
+    uid: PropTypes.string,
+  }).isRequired,
 };
 
-Search.defaultProps = {
-  user: null,
-};
+// Search.defaultProps = {
+//   user: null,
+// };
