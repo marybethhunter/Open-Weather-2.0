@@ -3,9 +3,12 @@ import firebase from 'firebase';
 import SignIn from '../views/SignIn';
 import LocationCards from '../components/LocationCards';
 import Search from '../components/Search';
+import { getUsersLocations } from '../api/data/weatherData';
 
 function Initialize() {
   const [user, setUser] = useState(null);
+  const [locations, setLocations] = useState([]);
+  const [weatherObj, setWeatherObj] = useState({});
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((authed) => {
@@ -15,6 +18,9 @@ function Initialize() {
           uid: authed.uid,
         };
         setUser(userObj);
+        getUsersLocations(authed.uid).then((locationArr) => {
+          setLocations(locationArr);
+        });
       } else if (user || user === null) {
         setUser(false);
       }
@@ -25,8 +31,12 @@ function Initialize() {
     <>
       {user ? (
         <>
-          <LocationCards />
-          <Search />
+          {locations.map((location) => (
+            <div key={location.firebaseKey}>
+              <LocationCards location={location} />
+            </div>
+          ))}
+          <Search weatherObj={weatherObj} setWeatherObj={setWeatherObj} />
         </>
       ) : (
         <>
